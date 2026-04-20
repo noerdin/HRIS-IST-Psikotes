@@ -17,7 +17,7 @@
 // Jika masih gagal, isi SPREADSHEET_ID_MANUAL dengan ID spreadsheet HRIS Anda.
 // Cara ambil ID: buka spreadsheet HRIS → lihat URL:
 // https://docs.google.com/spreadsheets/d/[COPY_ID_INI]/edit
-var SPREADSHEET_ID_MANUAL = '';  // ← Isi jika auto-detect gagal
+var SPREADSHEET_ID_MANUAL = '1hYVWADvIswVpD_QHjzlsxPqJahfbh0n7TYPdpgwWLa8';  // ← Isi jika auto-detect gagal
 var NAMA_SPREADSHEET      = 'PT Japa Indotama';
 
 var _ssCache = null;
