@@ -101,7 +101,8 @@ var HEADERS_TOKEN = [
   'TGL_SELESAI',     // 10
   'IP_ADDRESS',      // 11
   'TAB_SWITCH_COUNT',// 12 — berapa kali pindah tab
-  'DIBUAT_OLEH'      // 13
+  'DIBUAT_OLEH',     // 13
+  'USIA_PESERTA'     // 14 — untuk konversi skor IST
 ];
 
 // Header sheet db_hasil_psikotes
@@ -139,14 +140,23 @@ var HEADERS_HASIL = [
 function doGet(e) {
   var token = e.parameter.token || '';
 
-  // Halaman admin (generate token) — hanya untuk HRD
+  // Halaman admin — hanya untuk HRD
   if (e.parameter.admin === '1') {
     return HtmlService.createHtmlOutputFromFile('Admin')
       .setTitle('Admin IST - PT Japa Indotama')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
 
-  return HtmlService.createHtmlOutputFromFile('Tes')
+  // ── PENTING: Inject token ke HTML karena GAS iframe
+  // tidak bisa baca ?token= dari window.location.search ──
+  var htmlOutput = HtmlService.createHtmlOutputFromFile('Tes');
+  var htmlContent = htmlOutput.getContent();
+
+  // Sisipkan token sebagai variabel JS di awal script
+  var tokenScript = '<script>var _GAS_TOKEN = "' + token + '";</script>';
+  htmlContent = htmlContent.replace('<script>', tokenScript + '\n<script>');
+
+  return HtmlService.createHtmlOutput(htmlContent)
     .setTitle('Tes IST - PT Japa Indotama')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
@@ -237,6 +247,7 @@ function validasiToken(token) {
       kandidatId: tokenRow[1].toString(),
       mppId:      tokenRow[2].toString(),
       posisi:     tokenRow[5].toString(),
+      usia:       parseInt(tokenRow[14]) || 25, // dari kolom USIA_PESERTA
       rowIdx:     rowIdx,
       status:     status
     };
@@ -429,7 +440,8 @@ function buatTokenPeserta(dataForm) {
       formatTimestampTes(expired),
       'Belum Mulai',
       '', '', '', 0,
-      'Admin HR'
+      'Admin HR',
+      parseInt(dataForm.usia) || 25      // USIA_PESERTA
     ];
     sheet.appendRow(row);
     applyRowFormatTes(sheet, sheet.getLastRow(), HEADERS_TOKEN.length);
